@@ -1,13 +1,11 @@
 import pandas as pd
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
-import numpy as np
 from torch.utils.data import Dataset
 import matplotlib.pyplot as plt
 
-# BN not great for this kind of problem - avergaing age would be dumb
+
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda:0" if use_cuda else "cpu")
 torch.backends.cudnn.benchmark = True
@@ -15,36 +13,34 @@ print(device)
 
 
 class Binary_Network(nn.Module):
-    def __init__(self, features, hidden_size):
-        super(Binary_Network, self).__init__()
-        self.linear1 = nn.Linear(features, hidden_size)
-        self.linear2 = nn.Linear(hidden_size, hidden_size)
-        self.output_layer = nn.Linear(hidden_size, 1)
+        def __init__(self, features, hidden_size):
+            super(Binary_Network, self).__init__()
+            self.linear1 = nn.Linear(features, hidden_size)
+            self.linear2 = nn.Linear(hidden_size, hidden_size)
+            self.output_layer = nn.Linear(hidden_size, 1)
 
-        torch.nn.init.xavier_uniform_(self.linear1.weight)
-        torch.nn.init.xavier_uniform_(self.linear2.weight)
-        torch.nn.init.xavier_uniform_(self.output_layer.weight)
+            torch.nn.init.xavier_uniform_(self.linear1.weight)
+            torch.nn.init.xavier_uniform_(self.linear2.weight)
+            torch.nn.init.xavier_uniform_(self.output_layer.weight)
 
-    def forward(self, inputs):
-        relu = torch.nn.ReLU().to(device)
-        bn1 = nn.BatchNorm1d(49).to(device)
-        bn2 = nn.BatchNorm1d(49).to(device)
-        sm = nn.Sigmoid().to(device)  # 1 Dimensional data
+        def forward(self, inputs):
+            relu = torch.nn.ReLU().to(device)
+            sm = nn.Sigmoid().to(device)  # 1 Dimensional data
 
-        inputs = inputs.cuda()
+            inputs = inputs.cuda()
 
-        op = self.linear1(inputs)
-        op = bn1(op)
-        op = relu(op)
+            op = self.linear1(inputs)
+            op = relu(op)
 
-        op = self.linear2(op)
-        op = bn2(op)
-        op = relu(op)
+            op = self.linear2(op)
+            op = relu(op)
 
-        op = self.output_layer(op)
-        op = sm(op)
+            op = self.output_layer(op)
+            op = sm(op)
 
-        return op
+            op = op.to(device)
+
+            return op[0]
 
 
 class TitanDataset(Dataset):
@@ -114,20 +110,37 @@ def run_model(model, dataloader, num_epochs):
     running_loss = []
     for epoch in range(num_epochs):  # no. of epochs
         epoch_loss = 0
+        correct = 0
+        total_points = 0
         for data in dataloader:
+            # print(data[0])
+            # print(data[1])
+            # data and labels to GPU if available
             inputs, labels = data[0].to(device, non_blocking=True), data[1].to(device, non_blocking=True)
+            # set the parameter gradients to zero
             optimiser.zero_grad()
             outputs = model(inputs)
-            outputs = outputs.view(9)
-            loss = criterion(outputs.float(), labels.float())
+            # print('outputs:', outputs, 'labels:', labels)
+            basic_loss = criterion(outputs.float(), labels.float())
             # propagate the loss backward
-            loss.backward()
+            basic_loss.backward()
             # update the gradients
             optimiser.step()
-            epoch_loss += loss.item()
+            # print(basic_loss.item())
+            epoch_loss += basic_loss.item()
+            # print(basic_epoch_loss)
+            output = (outputs > 0.5).float()
+            if output == labels:
+                correct += 1
+            total_points += 1
 
         running_loss.append(epoch_loss)
-        print('epoch', epoch, epoch_loss)
+
+        print(correct)
+        print(total_points)
+        print("Number_Epoch {}/{}, Total_Epoch_Loss: {:.3f}, Accuracy: {:.3f}".format(epoch + 1, num_epochs,
+                                                                                      epoch_loss,
+                                                                                      correct / total_points))
 
     return running_loss
 
@@ -177,14 +190,12 @@ def evaluate_model(model, dataloader, val_labels, batch=False):
 dataset, _ = prep_train()
 train_features, train_labels, val_features, val_labels = split_datasets(dataset, 0.1)
 train_data, val_data = create_datasets(train_features, train_labels, val_features, val_labels)
-trainloader, valloader = prep_loaders(train_data, 9, val_data, 1)
+trainloader, valloader = prep_loaders(train_data, 1, val_data, 1)
 
-model = Binary_Network(7,49).to(device)
+model = Binary_Network(7, 49).to(device)
 criterion = nn.BCELoss()
 optimiser = optim.Adam(model.parameters(), lr=0.01)
-running_loss = run_model(model, trainloader, 540)
-evaluate_model(model, valloader, val_labels, True)
+running_loss = run_model(model, trainloader, 270)
+evaluate_model(model, valloader, val_labels, False)
 plt.plot(running_loss)
 plt.show()
-
-
