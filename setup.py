@@ -3,7 +3,7 @@ setup(
     name="Titanic_Binary_CLassifier",
     version="0.1",
     packages=find_packages(),
-    scripts=["Binary_Network_Baseline.py"],
+    scripts=["Binary_Network.py"],
 
     install_requires=["docutils>=0.3", "torch==1.5.0", "pandas==1.0.3", "matplotlib==3.2.1"],
 

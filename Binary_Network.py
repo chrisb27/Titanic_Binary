@@ -17,10 +17,14 @@ class Binary_Network(nn.Module):
             super(Binary_Network, self).__init__()
             self.linear1 = nn.Linear(features, hidden_size)
             self.linear2 = nn.Linear(hidden_size, hidden_size)
+            self.linear3 = nn.Linear(hidden_size, hidden_size)
+
             self.output_layer = nn.Linear(hidden_size, 1)
 
             torch.nn.init.xavier_uniform_(self.linear1.weight)
             torch.nn.init.xavier_uniform_(self.linear2.weight)
+            torch.nn.init.xavier_uniform_(self.linear3.weight)
+            #Model gets stuck if xavier initilisation missed for a layer
             torch.nn.init.xavier_uniform_(self.output_layer.weight)
 
         def forward(self, inputs):
@@ -33,6 +37,9 @@ class Binary_Network(nn.Module):
             op = relu(op)
 
             op = self.linear2(op)
+            op = relu(op)
+
+            op = self.linear3(op)
             op = relu(op)
 
             op = self.output_layer(op)
@@ -57,8 +64,8 @@ class TitanDataset(Dataset):
         return data
 
 def prep_train():
-    train = pd.read_csv('Titanic_Binary/train.csv')
-    test = pd.read_csv('Titanic_Binary/test.csv')
+    train = pd.read_csv('train.csv')
+    test = pd.read_csv('test.csv')
     train.set_index('PassengerId', inplace=True)
     train = train.drop(columns=['Name', 'Cabin', 'Ticket'])
 
@@ -192,10 +199,10 @@ train_features, train_labels, val_features, val_labels = split_datasets(dataset,
 train_data, val_data = create_datasets(train_features, train_labels, val_features, val_labels)
 trainloader, valloader = prep_loaders(train_data, 1, val_data, 1)
 
-model = Binary_Network(7, 49).to(device)
+model = Binary_Network(7, 7).to(device)
 criterion = nn.BCELoss()
 optimiser = optim.Adam(model.parameters(), lr=0.01)
-running_loss = run_model(model, trainloader, 270)
+running_loss = run_model(model, trainloader, 60)
 evaluate_model(model, valloader, val_labels, False)
 plt.plot(running_loss)
 plt.show()
