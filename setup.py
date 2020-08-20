@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 setup(
     name="Titanic_Binary_CLassifier",
     version="0.1",
-    packages=find_packages(include=['Titanic_Binary', 'Model_Code.*']),
+    packages=find_packages(include=['Titanic_Binary', 'Model_Code']),
     #scripts=["Model_Code/Binary_Network.py"],
 
     install_requires=["docutils>=0.3", "torch==1.5.0", "pandas==1.0.3", "matplotlib==3.2.1"],
