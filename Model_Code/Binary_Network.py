@@ -64,8 +64,8 @@ class TitanDataset(Dataset):
         return data
 
 def prep_train():
-    train = pd.read_csv('train.csv')
-    test = pd.read_csv('test.csv')
+    train = pd.read_csv('../train.csv')
+    test = pd.read_csv('../test.csv')
     train.set_index('PassengerId', inplace=True)
     train = train.drop(columns=['Name', 'Cabin', 'Ticket'])
 
