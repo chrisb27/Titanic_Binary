@@ -194,15 +194,22 @@ def evaluate_model(model, dataloader, val_labels, batch=False):
         print('Correct', total_correct, 'Total', len(val_labels))
         print('Validation Accuracy', total_correct / len(val_labels))
 
-dataset, _ = prep_train()
-train_features, train_labels, val_features, val_labels = split_datasets(dataset, 0.1)
-train_data, val_data = create_datasets(train_features, train_labels, val_features, val_labels)
-trainloader, valloader = prep_loaders(train_data, 1, val_data, 1)
+def train_new_model():
+    dataset, _ = prep_train()
+    train_features, train_labels, val_features, val_labels = split_datasets(dataset, 0.1)
+    train_data, val_data = create_datasets(train_features, train_labels, val_features, val_labels)
+    trainloader, valloader = prep_loaders(train_data, 1, val_data, 1)
 
-model = Binary_Network(7, 7).to(device)
-criterion = nn.BCELoss()
-optimiser = optim.Adam(model.parameters(), lr=0.01)
-running_loss = run_model(model, trainloader, 60)
-evaluate_model(model, valloader, val_labels, False)
-plt.plot(running_loss)
-plt.show()
+    model = Binary_Network(7, 7).to(device)
+    criterion = nn.BCELoss()
+    optimiser = optim.Adam(model.parameters(), lr=0.01)
+    running_loss = run_model(model, trainloader, 60)
+    evaluate_model(model, valloader, val_labels, False)
+    plt.plot(running_loss)
+    plt.show()
+
+# Take out extra code
+# Main.py which imports the file and does the science
+# pip install of the library - pull data from database. Needs to have a secret(KV pairs) - pass data to model
+# Extract parameters - upload parameters - Could track parameters in database or as a YAML + Load into the model
+# - Production model should not to any training - Impose learned parameters onto model
