@@ -31,8 +31,6 @@ class Binary_Network(nn.Module):
             relu = torch.nn.ReLU().to(device)
             sm = nn.Sigmoid().to(device)  # 1 Dimensional data
 
-            inputs = inputs.cuda()
-
             op = self.linear1(inputs)
             op = relu(op)
 
@@ -63,9 +61,20 @@ class TitanDataset(Dataset):
 
         return data
 
-def prep_train():
-    train = pd.read_csv('../Data/train.csv')
-    test = pd.read_csv('../Data/test.csv')
+class TestDataset(Dataset):
+    def __init__(self, features):
+        self.x = torch.FloatTensor(features.values).to(device)
+
+    def __len__(self):
+        return (len(self.x))
+
+    def __getitem__(self, idx):
+        data = self.x[idx]
+
+        return data
+
+def prep_train(path_to_train):
+    train = pd.read_csv(path_to_train)
     train.set_index('PassengerId', inplace=True)
     train = train.drop(columns=['Name', 'Cabin', 'Ticket'])
 
@@ -82,7 +91,7 @@ def prep_train():
     print('dataset prepped')
     print(train.info())
 
-    return train, test
+    return train
 
 def split_datasets(dataset,val_split):
     total_points = dataset.shape[0]
@@ -112,7 +121,7 @@ def prep_loaders(train_data, train_batch_size, val_data, val_batch_size):
 
     return trainloader, valloader
 
-def run_model(model, dataloader, num_epochs):
+def run_model(model, dataloader, num_epochs, criterion, optimiser):
     model.train()
     running_loss = []
     for epoch in range(num_epochs):  # no. of epochs
@@ -194,8 +203,78 @@ def evaluate_model(model, dataloader, val_labels, batch=False):
         print('Correct', total_correct, 'Total', len(val_labels))
         print('Validation Accuracy', total_correct / len(val_labels))
 
-def train_new_model():
-    dataset, _ = prep_train()
+
+def load_models(filepath, model_object):
+    """
+    deserialises and loads the model parameters and places them into the model object
+    Parameters
+    ----------
+    filepath
+    model_object: nn model object
+
+    Returns
+    -------
+
+    """
+    model_object.load_state_dict(torch.load(filepath))
+
+    return model_object
+
+
+def save_models(model_object, filepath):
+    """
+    Saves the torch model objects parameters as a serialised pickle
+    Parameters
+    ----------
+    model_object
+    filepath
+
+    Returns
+    -------
+
+    """
+
+    torch.save(model_object.state_dict(), filepath)
+    return
+
+##### MAIN FUNCTIONS ####
+
+def predict(model, path_to_data):
+    test = pd.read_csv(path_to_data)
+
+    test.set_index('PassengerId', inplace=True)
+    test = test.drop(columns=['Name', 'Cabin', 'Ticket'])
+
+    mapping = {'S': 2, 'Q': 1, 'C': 0}
+    test['Embarked'] = test['Embarked'].str.upper().map(mapping)
+    sex_mapping = {'male': 1, 'female': 0}
+    test['Sex'] = test['Sex'].str.lower().map(sex_mapping)
+
+    test['Age'] = test['Age'].fillna(test['Age'].median())
+    test['Embarked'] = test['Embarked'].fillna(test['Embarked'].median())
+    test = test.dropna()
+    test['Embarked'] = test['Embarked'].astype(int)
+
+    print(test.info())
+    test_data = TestDataset(test)
+    testloader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False)
+    predictions = []
+    for data in testloader:
+        input = data[0].to(device, non_blocking=True)
+        prediction = model(input)
+        output = (prediction > 0.5).float()
+        output = int(output.cpu().detach().numpy())
+        predictions.append(output)
+
+    id = list(test.index.values)
+    test_output = pd.DataFrame({'Id': id, 'Predictions': predictions})
+    test_output.set_index('Id', inplace=True)
+    print(test_output)
+    test_output.to_csv('output.csv')
+    print('Analysis finished. Check output.csv')
+
+def train_new_model(path_to_train):
+    dataset = prep_train(path_to_train)
     train_features, train_labels, val_features, val_labels = split_datasets(dataset, 0.1)
     train_data, val_data = create_datasets(train_features, train_labels, val_features, val_labels)
     trainloader, valloader = prep_loaders(train_data, 1, val_data, 1)
@@ -203,10 +282,14 @@ def train_new_model():
     model = Binary_Network(7, 7).to(device)
     criterion = nn.BCELoss()
     optimiser = optim.Adam(model.parameters(), lr=0.01)
-    running_loss = run_model(model, trainloader, 60)
+    running_loss = run_model(model, trainloader, 100, criterion, optimiser)
     evaluate_model(model, valloader, val_labels, False)
     plt.plot(running_loss)
     plt.show()
+
+    save_models(model, 'trained_model.pth')
+
+    predict(model, 'Data/test.csv')
 
 # Take out extra code
 # Main.py which imports the file and does the science
