@@ -1,4 +1,4 @@
-from Model_Code import Binary_Network
+from Titanicbc import Binary_Network
 import torch
 import yaml
 import pandas as pd

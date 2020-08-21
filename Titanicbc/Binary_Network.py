@@ -337,4 +337,4 @@ def train_new_model(dataframe, input_dim, hidden_dim):
     plt.ylabel('loss')
     plt.show()
 
-    save_models(model, 'trained_model.pth')
+    save_models(model, '../trained_model.pth')
