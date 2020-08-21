@@ -316,7 +316,7 @@ def predict(model, dataframe):
 
     id = list(test.index.values)
     test_output = pd.DataFrame({'PassengerId': id, 'Survived': predictions})
-    test_output.set_index('Id', inplace=True)
+    test_output.set_index('PassengerId', inplace=True)
     print(test_output)
     test_output.to_csv('output.csv') # Overwrites exisiting output.csv file
     print('Analysis finished. Check output.csv')
