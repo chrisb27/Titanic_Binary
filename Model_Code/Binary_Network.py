@@ -4,12 +4,13 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset
 import matplotlib.pyplot as plt
+import os
+import psycopg2
 
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda:0" if use_cuda else "cpu")
 torch.backends.cudnn.benchmark = True
-print(device)
 
 
 class Binary_Network(nn.Module):
@@ -73,20 +74,22 @@ class TestDataset(Dataset):
 
         return data
 
-def prep_train(path_to_train):
-    train = pd.read_csv(path_to_train)
-    train.set_index('PassengerId', inplace=True)
-    train = train.drop(columns=['Name', 'Cabin', 'Ticket'])
+def prep_train(train):
+    columns = [column.lower() for column in train.columns]
+    train.columns = columns
+    
+    train.set_index('passengerid', inplace=True)
+    train = train.drop(columns=['name', 'cabin', 'ticket'])
 
     mapping = {'S': 2, 'Q': 1, 'C': 0}
-    train['Embarked'] = train['Embarked'].str.upper().map(mapping)
+    train['embarked'] = train['embarked'].str.upper().map(mapping)
     sex_mapping = {'male': 1, 'female': 0}
-    train['Sex'] = train['Sex'].str.lower().map(sex_mapping)
+    train['sex'] = train['sex'].str.lower().map(sex_mapping)
 
-    train['Age'] = train['Age'].fillna(train['Age'].median())
-    train['Embarked'] = train['Embarked'].fillna(train['Embarked'].median())
+    train['age'] = train['age'].fillna(train['age'].median())
+    train['embarked'] = train['embarked'].fillna(train['embarked'].median())
     train = train.dropna()
-    train['Embarked'] = train['Embarked'].astype(int)
+    train['embarked'] = train['embarked'].astype(int)
 
     print('dataset prepped')
     print(train.info())
@@ -101,11 +104,11 @@ def split_datasets(dataset,val_split):
 
     print('train size:', train.shape)
     print('validation size:', validation.shape)
-    train_features = train.drop(columns=['Survived'])
-    train_labels = train['Survived']
+    train_features = train.drop(columns=['survived'])
+    train_labels = train['survived']
 
-    val_features = validation.drop(columns=['Survived'])
-    val_labels = validation['Survived']
+    val_features = validation.drop(columns=['survived'])
+    val_labels = validation['survived']
 
     return train_features, train_labels, val_features, val_labels
 
@@ -152,8 +155,6 @@ def run_model(model, dataloader, num_epochs, criterion, optimiser):
 
         running_loss.append(epoch_loss)
 
-        print(correct)
-        print(total_points)
         print("Number_Epoch {}/{}, Total_Epoch_Loss: {:.3f}, Accuracy: {:.3f}".format(epoch + 1, num_epochs,
                                                                                       epoch_loss,
                                                                                       correct / total_points))
@@ -220,6 +221,23 @@ def load_models(filepath, model_object):
 
     return model_object
 
+def remove_path(filepath):
+    """
+    Removes a file path if it exists
+    Parameters
+    ----------
+    filepath: string of the file path
+
+    Returns
+    -------
+
+    """
+
+    if os.path.exists(filepath):
+        os.remove(filepath)
+
+    return
+
 
 def save_models(model_object, filepath):
     """
@@ -234,26 +252,56 @@ def save_models(model_object, filepath):
 
     """
 
+
+    remove_path(filepath)
     torch.save(model_object.state_dict(), filepath)
     return
 
+def retrieve_from_database(num_columns):
+    conn = psycopg2.connect("host=localhost dbname=postgres user=postgres password=password")
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM train')
+    train = cur.fetchall()
+
+    columns = []
+    for i in range(num_columns):
+        columns.append(cur.description[i][0])
+    train = pd.DataFrame(train)
+    train.columns = columns
+
+    cur.execute('SELECT * FROM test')
+    test = cur.fetchall()
+    test_columns = []
+    for i in range(num_columns-1):
+        test_columns.append(cur.description[i][0])
+    test = pd.DataFrame(test)
+    test.columns = test_columns
+
+    return train, test
+
 ##### MAIN FUNCTIONS ####
 
-def predict(model, path_to_data):
-    test = pd.read_csv(path_to_data)
+def predict(model, dataframe):
+    test = dataframe
 
-    test.set_index('PassengerId', inplace=True)
-    test = test.drop(columns=['Name', 'Cabin', 'Ticket'])
+    columns = [column.lower() for column in test.columns]
+    test.columns = columns
+    
+    test.set_index('passengerid', inplace=True)
+    test = test.drop(columns=['name', 'cabin', 'ticket'])
 
     mapping = {'S': 2, 'Q': 1, 'C': 0}
-    test['Embarked'] = test['Embarked'].str.upper().map(mapping)
+    test['embarked'] = test['embarked'].str.upper().map(mapping)
     sex_mapping = {'male': 1, 'female': 0}
-    test['Sex'] = test['Sex'].str.lower().map(sex_mapping)
+    test['sex'] = test['sex'].str.lower().map(sex_mapping)
 
-    test['Age'] = test['Age'].fillna(test['Age'].median())
-    test['Embarked'] = test['Embarked'].fillna(test['Embarked'].median())
+    test['age'] = test['age'].fillna(test['age'].median())
+    test['embarked'] = test['embarked'].fillna(test['embarked'].median())
     test = test.dropna()
-    test['Embarked'] = test['Embarked'].astype(int)
+    test['embarked'] = test['embarked'].astype(int)
+    test['pclass'] = test['pclass'].astype(int)
+    test['parch'] = test['parch'].astype(int)
+    test['fare'] = test['fare'].astype(float)
 
     print(test.info())
     test_data = TestDataset(test)
@@ -270,29 +318,23 @@ def predict(model, path_to_data):
     test_output = pd.DataFrame({'Id': id, 'Predictions': predictions})
     test_output.set_index('Id', inplace=True)
     print(test_output)
-    test_output.to_csv('output.csv')
+    test_output.to_csv('output.csv') # Overwrites exisiting output.csv file
     print('Analysis finished. Check output.csv')
 
-def train_new_model(path_to_train):
-    dataset = prep_train(path_to_train)
+def train_new_model(dataframe, input_dim, hidden_dim):
+    dataset = prep_train(dataframe)
     train_features, train_labels, val_features, val_labels = split_datasets(dataset, 0.1)
     train_data, val_data = create_datasets(train_features, train_labels, val_features, val_labels)
     trainloader, valloader = prep_loaders(train_data, 1, val_data, 1)
 
-    model = Binary_Network(7, 7).to(device)
+    model = Binary_Network(input_dim, hidden_dim).to(device)
     criterion = nn.BCELoss()
     optimiser = optim.Adam(model.parameters(), lr=0.01)
-    running_loss = run_model(model, trainloader, 100, criterion, optimiser)
+    running_loss = run_model(model, trainloader, 60, criterion, optimiser)
     evaluate_model(model, valloader, val_labels, False)
     plt.plot(running_loss)
+    plt.xlabel('epochs')
+    plt.ylabel('loss')
     plt.show()
 
     save_models(model, 'trained_model.pth')
-
-    predict(model, 'Data/test.csv')
-
-# Take out extra code
-# Main.py which imports the file and does the science
-# pip install of the library - pull data from database. Needs to have a secret(KV pairs) - pass data to model
-# Extract parameters - upload parameters - Could track parameters in database or as a YAML + Load into the model
-# - Production model should not to any training - Impose learned parameters onto model
