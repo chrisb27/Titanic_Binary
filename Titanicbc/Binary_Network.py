@@ -283,6 +283,7 @@ def retrieve_from_database(num_columns):
 
 def predict(model, dataframe):
     test = dataframe
+    print(test.shape)
 
     columns = [column.lower() for column in test.columns]
     test.columns = columns
@@ -297,7 +298,7 @@ def predict(model, dataframe):
 
     test['age'] = test['age'].fillna(test['age'].median())
     test['embarked'] = test['embarked'].fillna(test['embarked'].median())
-    test = test.dropna()
+    test['fare'] = test['fare'].fillna(test['embarked'].median())
     test['embarked'] = test['embarked'].astype(int)
     test['pclass'] = test['pclass'].astype(int)
     test['parch'] = test['parch'].astype(int)

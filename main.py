@@ -29,6 +29,7 @@ if data_load == 'csv':
 elif data_load == 'database':
     train, test = Binary_Network.retrieve_from_database(num_columns)
 
+
 #### Main Script ####
 
 if train_new:

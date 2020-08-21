@@ -3,7 +3,7 @@
 
 data_load: database
 num_columns: 12
-train_new: True
+train_new: False
 Binary_Network:
   optimiser: # Will implement when using hot starts
     type:
