@@ -34,7 +34,7 @@ def main():
     #### Main Script ####
 
     if train_new:
-        model = Binary_Network.train_new_model(train, input_dim, hidden_dim)
+        model = Binary_Network.train_new_model(train, num_columns-5, hidden_dim, model_path)
 
     model = Binary_Network.Binary_Network(input_dim, hidden_dim)
     model = Binary_Network.load_models(model_path, model).to(device)

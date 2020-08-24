@@ -322,7 +322,7 @@ def predict(model, dataframe):
     test_output.to_csv('output.csv') # Overwrites exisiting output.csv file
     print('Analysis finished. Check output.csv')
 
-def train_new_model(dataframe, input_dim, hidden_dim):
+def train_new_model(dataframe, input_dim, hidden_dim, model_path):
     dataset = prep_train(dataframe)
     train_features, train_labels, val_features, val_labels = split_datasets(dataset, 0.1)
     train_data, val_data = create_datasets(train_features, train_labels, val_features, val_labels)
@@ -338,4 +338,4 @@ def train_new_model(dataframe, input_dim, hidden_dim):
     plt.ylabel('loss')
     plt.show()
 
-    save_models(model, '../trained_model.pth')
+    save_models(model, model_path)
