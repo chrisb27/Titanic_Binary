@@ -7,7 +7,7 @@ README = (HERE/"README.md").read_text()
 
 setup(
     name="Titanicbc",
-    version="0.1",
+    version="0.0.2",
     packages=find_packages(include=['Titanic_Binary', 'Titanicbc']), #.* and init are interchangable
     #scripts=["Titanicbc/Binary_Network.py"],
 
