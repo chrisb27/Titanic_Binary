@@ -2,8 +2,11 @@
 ---
 
 data_load: database
+
 num_columns: 12
+
 train_new: False
+
 Binary_Network:
   optimiser: # Will implement when using hot starts
     type:
@@ -16,6 +19,6 @@ Binary_Network:
     output_dim: 1 # Number of output neurons in then network
     batch_size: 1 # when updating we are a single observation
     model_save_path: trained_model.pth # If a larger number of actors we will loop over this and concatenate a string
-    #actor_optimiser_path: trained_optimiser.pth # can be used if hot starts are added
+    #trained_optimiser.pth # can be used if hot starts are added
     #dropout: 0.2 # Randomly dropout neurons when back propagating - add later for next regularisation of network
 
