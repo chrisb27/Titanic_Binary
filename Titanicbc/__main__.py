@@ -25,8 +25,8 @@ def main():
 
     ####Read in data from database or csv ####
     if data_load == 'csv':
-        train = pd.read_csv('Data/train.csv')
-        test = pd.read_csv('Data/test.csv')
+        train = pd.read_csv('train.csv')
+        test = pd.read_csv('test.csv')
 
     elif data_load == 'database':
         train, test = Binary_Network.retrieve_from_database(num_columns)

@@ -13,4 +13,3 @@ Binary_Network:
     output_dim: 1
     batch_size: 1
     model_save_path: trained_model.pth
-
