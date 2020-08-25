@@ -1,7 +1,7 @@
 # Configuration file for the Binary_Network
 ---
 
-data_load: database
+data_load: csv
 
 num_columns: 12
 
