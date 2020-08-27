@@ -1,6 +1,6 @@
 # Titanicbc
 
-Titanicbc is a simple interface for training neural networks with custom hyper-parameters. The current version allows
+Titanicbc is a simple interface for training pytorch neural networks with custom hyper-parameters. The current version allows
 training a binary classifier network for the famous Kaggle Titanic dataset. 
 
 The aim of this package is to allow those with little or no neural network coding experience to learn how different hyper-parameter 
@@ -23,14 +23,17 @@ ___
 
 ___
 
-Titanicbc provides a simple interface for training and using pre-trained networks via the config.yaml file.
+Titanicbc provides a simple interface for training and using pre-trained pytorch networks via the config.yaml file.
 
 The config.yaml file is included in the Python site-packages folder for Titanicbc. To find the python site-packages on
 your machine run ***python -m site***. Once in site-packages, select the Titanicbc folder.
 
 Once hyper-parameters have been set using config.yaml, simply run ***python -m Titanicbc*** from the command line or terminal to train a network or make 
-predictions (depending on the value of train_new in config.yaml). The predictions made by the new or existing model will be saved into the same location in
-site-packages/Titanicbc as output.csv. The output columns are the PassengerId and the prediction of whether that passenger survived.
+predictions (depending on the value of train_new in config.yaml). The accuracy on a validation set for comparing models is displayed below the final epoch,
+above the prediction output and dataframe.
+
+The predictions made by the new or existing model will be saved into the same location in
+site-packages/Titanicbc as output.csv. The output columns are in the Kaggle required format (the PassengerId and the prediction of whether that passenger survived).
 
 ___
 
@@ -48,5 +51,7 @@ in trained_model.pth will be loaded and used for predictions.
 4. learning_rate (float) - Parameter multiplied to the weight updates during stochastic gradient descent. Currently only the Adam optimiser is used.
 
 5. weight_init (uniform, xavier) - Tells the network which type of initialisation to use for the model weights. Xavier is currently recommended
+
+6. weight_decay (float) -  weight decay acts as l2 regularlisation on the neural network.
 
 ___

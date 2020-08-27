@@ -21,6 +21,7 @@ def main():
     hidden_dim = model_parameters['Binary_Network']['initialisations']['hidden_dim']
     learning_rate = model_parameters['Binary_Network']['optimiser']['learning_rate']
     epochs = model_parameters['Binary_Network']['num_epochs']
+    weight_decay = model_parameters['Binary_Network']['optimiser']['weight_decay']
 
     input_dim = num_columns - 5
 
@@ -36,7 +37,7 @@ def main():
     with res.path('Titanicbc', 'trained_model.pth') as m:
         model_path = m
     if train_new:
-        model = Binary_Network.train_new_model(train, input_dim, hidden_dim, model_path, learning_rate, epochs)
+        model = Binary_Network.train_new_model(train, input_dim, hidden_dim, model_path, learning_rate, epochs, weight_decay)
 
     else:
         model = Binary_Network.Binary_Network(input_dim, hidden_dim)

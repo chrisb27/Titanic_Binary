@@ -6,6 +6,7 @@ Binary_Network:
   num_epochs: 60 # Number of passes over the training data
   optimiser:
     learning_rate: 0.01 # Parameter multiplied to the weight updates during stochastic gradient descent - Uses Adam optimiser
+    weight_decay: 0 # Weight decay acts as l2 regularlisation on the neural network
   initialisations:
     weight_init: xavier # type of initialisation used for the model weights, Xavier is currently recommended
     hidden_dim: 7 # Number of neurons in the hidden layers

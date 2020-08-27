@@ -8,7 +8,6 @@ import os
 from importlib import resources as res
 import yaml
 
-
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda:0" if use_cuda else "cpu")
 torch.backends.cudnn.benchmark = True
@@ -325,7 +324,7 @@ def predict(model, dataframe):
     test_output.to_csv(path) # Overwrites exisiting output.csv file
     print('Analysis finished. Check output.csv')
 
-def train_new_model(dataframe, input_dim, hidden_dim, model_path, learning_rate=0.01, num_epochs=60):
+def train_new_model(dataframe, input_dim, hidden_dim, model_path, learning_rate=0.01, num_epochs=60, weight_decay=0):
     dataset = prep_train(dataframe)
     train_features, train_labels, val_features, val_labels = split_datasets(dataset, 0.1)
     train_data, val_data = create_datasets(train_features, train_labels, val_features, val_labels)
@@ -333,7 +332,7 @@ def train_new_model(dataframe, input_dim, hidden_dim, model_path, learning_rate=
 
     model = Binary_Network(input_dim, hidden_dim).to(device)
     criterion = nn.BCELoss()
-    optimiser = optim.Adam(model.parameters(), learning_rate)
+    optimiser = optim.Adam(model.parameters(), learning_rate, weight_decay)
     running_loss = run_model(model, trainloader, num_epochs, criterion, optimiser)
     evaluate_model(model, valloader, val_labels, False)
     plt.plot(running_loss)
