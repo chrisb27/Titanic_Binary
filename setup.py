@@ -29,3 +29,5 @@ setup(
     url="https://github.com/chrisb27/Titanic_Binary"
 
 )
+
+# Uninstall then predict

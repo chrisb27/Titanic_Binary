@@ -30,7 +30,7 @@ your machine run ***python -m site***. Once in site-packages, select the Titanic
 
 Once hyper-parameters have been set using config.yaml, simply run ***python -m Titanicbc*** from the command line or terminal to train a network or make 
 predictions (depending on the value of train_new in config.yaml). The predictions made by the new or existing model will be saved into the same location in
-site-packages/Titanicbc as output.csv.
+site-packages/Titanicbc as output.csv. The output columns are the PassengerId and the prediction of whether that passenger survived.
 
 ___
 
