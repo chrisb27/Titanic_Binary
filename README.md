@@ -26,7 +26,7 @@ ___
 Titanicbc provides a simple interface for training and using pre-trained networks via the config.yaml file.
 
 The config.yaml file is included in the Python site-packages folder for Titanicbc. To find the python site-packages on
-your machine run ***python -m site*** from the command line or terminal and follow the path given by ***USER-SITE***.
+your machine run ***python -m site***. Once in site-packages, select the Titanicbc folder.
 
 Once hyper-parameters have been set using config.yaml, simply run ***python -m Titanicbc*** from the command line or terminal to train a network or make 
 predictions (depending on the value of train_new in config.yaml). The predictions made by the new or existing model will be saved into the same location in

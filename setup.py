@@ -9,10 +9,10 @@ README = (HERE/"README.md").read_text()
 
 setup(
     name="Titanicbc",
-    version="1.0.1",
+    version="1.1.0",
     packages=find_packages(include=['Titanicbc']), #.* and init are interchangable
 
-    install_requires=["docutils>=0.3", "torch>=1.5.0", "pandas>=1.0.3", "matplotlib>=3.2.1", "psycopg2>=2.8.5"],
+    install_requires=["docutils>=0.3", "torch>=1.5.0", "pandas>=1.0.3", "matplotlib>=3.2.1"],
 
     package_data={
         "Titanicbc": ["*.txt", "*.yaml", "*.rst", "*.md", "*.pth", "*.csv"]
