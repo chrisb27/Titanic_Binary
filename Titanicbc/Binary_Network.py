@@ -5,9 +5,8 @@ import torch.optim as optim
 from torch.utils.data import Dataset
 import matplotlib.pyplot as plt
 import os
-import psycopg2
-import os
 from importlib import resources as res
+import yaml
 
 
 use_cuda = torch.cuda.is_available()
@@ -18,17 +17,37 @@ torch.backends.cudnn.benchmark = True
 class Binary_Network(nn.Module):
         def __init__(self, features, hidden_size):
             super(Binary_Network, self).__init__()
+
+            with res.open_binary('Titanicbc', 'config.yaml') as fp:
+                model_parameters = yaml.load(fp, Loader=yaml.Loader)
+
+            self.weight_init = model_parameters['Binary_Network']['initialisations']['weight_init']
             self.linear1 = nn.Linear(features, hidden_size)
             self.linear2 = nn.Linear(hidden_size, hidden_size)
             self.linear3 = nn.Linear(hidden_size, hidden_size)
 
             self.output_layer = nn.Linear(hidden_size, 1)
 
-            torch.nn.init.xavier_uniform_(self.linear1.weight)
-            torch.nn.init.xavier_uniform_(self.linear2.weight)
-            torch.nn.init.xavier_uniform_(self.linear3.weight)
-            #Model gets stuck if xavier initilisation missed for a layer
-            torch.nn.init.xavier_uniform_(self.output_layer.weight)
+
+
+            if self.weight_init.lower() == 'xavier':
+                torch.nn.init.xavier_uniform_(self.linear1.weight)
+                torch.nn.init.xavier_uniform_(self.linear2.weight)
+                torch.nn.init.xavier_uniform_(self.linear3.weight)
+                torch.nn.init.xavier_uniform_(self.output_layer.weight)
+
+            elif self.weight_init.lower() =='uniform':
+                torch.nn.init.uniform_(self.linear1.weight)
+                torch.nn.init.uniform_(self.linear2.weight)
+                torch.nn.init.uniform_(self.linear3.weight)
+                torch.nn.init.uniform_(self.output_layer.weight)
+
+            else:
+                torch.nn.init.xavier_uniform_(self.linear1.weight)
+                torch.nn.init.xavier_uniform_(self.linear2.weight)
+                torch.nn.init.xavier_uniform_(self.linear3.weight)
+                torch.nn.init.xavier_uniform_(self.output_layer.weight)
+
 
         def forward(self, inputs):
             relu = torch.nn.ReLU().to(device)
@@ -259,28 +278,6 @@ def save_models(model_object, filepath):
     remove_path(filepath)
     torch.save(model_object.state_dict(), filepath)
     return
-
-def retrieve_from_database(num_columns):
-    conn = psycopg2.connect("host=localhost dbname=postgres user=postgres password=password")
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM train')
-    train = cur.fetchall()
-
-    columns = []
-    for i in range(num_columns):
-        columns.append(cur.description[i][0])
-    train = pd.DataFrame(train)
-    train.columns = columns
-
-    cur.execute('SELECT * FROM test')
-    test = cur.fetchall()
-    test_columns = []
-    for i in range(num_columns-1):
-        test_columns.append(cur.description[i][0])
-    test = pd.DataFrame(test)
-    test.columns = test_columns
-
-    return train, test
 
 ##### MAIN FUNCTIONS ####
 
