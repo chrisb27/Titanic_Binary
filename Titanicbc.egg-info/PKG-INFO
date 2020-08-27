@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: Titanicbc
-Version: 0.1.9
+Version: 0.4.5
 Summary: Simple neural network interface including pre-trained model for the Kaggle Titanic dataset
 Home-page: https://github.com/chrisb27/Titanic_Binary
 Author: Christopher Burton
@@ -32,19 +32,19 @@ Description: # Titanic Binary Classifier
         
         option number. Key (value options) 
         
-        1. data_load (csv, database) - csv loads csv files stored in Data folder as train and test, database loads files from
-        train and test tables within a postgresql database
+        1. data_load (csv, database) - csv loads csv files stored in the package as train and test, database loads files from
+        train and test tables within a postgresql database.
         
-        2. num_columns (Integer) - number of columns in the train dataset
+        2. num_columns (Integer) - number of columns in the train dataset.
         
-        3. train_new (True, False) - If true, a new neural network will be trained. If False the model parameters saved
+        3. train_new (True, False) - If true, a new neural network will be trained and overwrite trained_model.pth. If False the model parameters saved
         in trained_model.pth will be loaded and used for predictions.
         
-        4. hidden_dim (Integer) - Number of neurons on each of the 3 hidden layers within the network
+        4. hidden_dim (Integer) - Number of neurons in each of the 3 hidden layers within the network.
         
-        5. output_dim (Integer) - Number of output neurons in the network, defaults to 1 for the classification network
+        5. num_epochs (Integer) - Number of passes the network will make over the training data when training a new model
         
-        6. model_save_path (string) - Path to save and load models to, must be left as trained_model.pth is using the pretrained model in the package
+        6. learning_rate (float) - Parameter multiplied to the weight updates during stochastic gradient descent
         
         ___
         

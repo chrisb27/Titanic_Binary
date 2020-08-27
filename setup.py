@@ -5,15 +5,17 @@ HERE = pathlib.Path(__file__).parent
 
 README = (HERE/"README.md").read_text()
 
+#CONFIG = (HERE/"config.yaml")
+
 setup(
     name="Titanicbc",
-    version="0.2.0",
+    version="0.4.5",
     packages=find_packages(include=['Titanicbc']), #.* and init are interchangable
 
     install_requires=["docutils>=0.3", "torch>=1.5.0", "pandas>=1.0.3", "matplotlib>=3.2.1", "psycopg2>=2.8.5"],
 
     package_data={
-        "": ["*.txt", "*.yaml", "*.rst", "*.md", "*.pth"]
+        "Titanicbc": ["*.txt", "*.yaml", "*.rst", "*.md", "*.pth", "*.csv"]
     },
 
     include_package_data = True,
