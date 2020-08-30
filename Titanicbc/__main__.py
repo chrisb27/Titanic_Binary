@@ -9,6 +9,7 @@ from PySide2.QtWidgets import (QAction, QApplication, QHeaderView, QHBoxLayout, 
 from Titanicbc import Binary_Network
 import torch
 import yaml
+import matplotlib.pyplot as plt
 import pandas as pd
 from importlib import resources as res
 import threading
@@ -81,6 +82,7 @@ class Widget(QWidget):
 
         self.confirm = QPushButton("Confirm network configuration and train")
         self.predict = QPushButton("Predict using last trained model")
+        self.plot_loss = QPushButton("Plot loss of last trained model")
         self.output = QPushButton("Open output.csv")
         self.quit = QPushButton("Quit")
 
@@ -91,6 +93,7 @@ class Widget(QWidget):
         self.layout.addRow(self.weight_init_label, self.weight_init)
         self.layout.addWidget(self.confirm)
         self.layout.addWidget(self.predict)
+        self.layout.addWidget(self.plot_loss)
         self.layout.addWidget(self.output)
         self.layout.addWidget(self.quit)
 
@@ -100,6 +103,7 @@ class Widget(QWidget):
         # Signals and Slots
         self.confirm.clicked.connect(self.confirm_thread)
         self.predict.clicked.connect(self.op_predict)
+        self.plot_loss.clicked.connect(self.plot)
         self.output.clicked.connect(self.open_output)
         self.quit.clicked.connect(self.quit_application)
 
@@ -156,8 +160,9 @@ class Widget(QWidget):
             model_path = m
 
         # All params are coming through as a string
-        model = Binary_Network.train_new_model(train, self.input_dim, train_hidden_dim, model_path, train_learning_rate,
-                                               train_num_epochs, train_weight_decay).to(self.device)
+        self.running_loss, model= Binary_Network.train_new_model(train, self.input_dim, train_hidden_dim, model_path, train_learning_rate,
+                                               train_num_epochs, train_weight_decay)
+        model.to(self.device)
         Binary_Network.predict(model, test)
 
 
@@ -178,6 +183,16 @@ class Widget(QWidget):
         model = Binary_Network.Binary_Network(self.input_dim, prev_hidden_dim)
         model = Binary_Network.load_models(model_path, model).to(self.device)
         Binary_Network.predict(model, test_predict)
+
+    @Slot()
+    def plot(self):
+        try:
+            plt.plot(self.running_loss)
+            plt.xlabel('epochs')
+            plt.ylabel('loss')
+            plt.show()
+        except:
+            print("Must train a new model before plotting loss")
 
     @Slot()
     def open_output(self):
@@ -237,4 +252,6 @@ def main():
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
-    main()
+    threadpool = QThreadPool()
+    worker = Worker(main())
+    threadpool.start(worker)

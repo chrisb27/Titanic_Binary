@@ -111,8 +111,8 @@ def prep_train(train):
     train = train.dropna()
     train['embarked'] = train['embarked'].astype(int)
 
-    print('dataset prepped')
-    print(train.info())
+    #print('dataset prepped')
+    #print(train.info())
 
     return train
 
@@ -122,8 +122,8 @@ def split_datasets(dataset,val_split):
     train = dataset[:fraction]
     validation = dataset[fraction:]
 
-    print('train size:', train.shape)
-    print('validation size:', validation.shape)
+    #print('train size:', train.shape)
+    #print('validation size:', validation.shape)
     train_features = train.drop(columns=['survived'])
     train_labels = train['survived']
 
@@ -341,11 +341,11 @@ def train_new_model(dataframe, input_dim, hidden_dim, model_path, learning_rate=
     optimiser = optim.Adam(model.parameters(), learning_rate, weight_decay=weight_decay)
     running_loss = run_model(model, trainloader, num_epochs, criterion, optimiser)
     evaluate_model(model, valloader, val_labels, False)
-    plt.plot(running_loss)
-    plt.xlabel('epochs')
-    plt.ylabel('loss')
-    plt.show()
+    # plt.plot(running_loss)
+    # plt.xlabel('epochs')
+    # plt.ylabel('loss')
+    # plt.show()
 
     save_models(model, model_path)
 
-    return model
+    return running_loss, model
