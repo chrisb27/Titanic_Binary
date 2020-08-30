@@ -282,7 +282,7 @@ def save_models(model_object, filepath):
 
 def predict(model, dataframe):
     test = dataframe
-    print(test.shape)
+    #print(test.shape)
 
     columns = [column.lower() for column in test.columns]
     test.columns = columns
@@ -303,7 +303,7 @@ def predict(model, dataframe):
     test['parch'] = test['parch'].astype(int)
     test['fare'] = test['fare'].astype(float)
 
-    print(test.info())
+    #print(test.info())
     test_data = TestDataset(test)
     testloader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False)
     predictions = []
@@ -325,12 +325,18 @@ def predict(model, dataframe):
     print('Analysis finished. Check output.csv')
 
 def train_new_model(dataframe, input_dim, hidden_dim, model_path, learning_rate=0.01, num_epochs=60, weight_decay=0.0):
+
+    ## Re-casting parameters that may have changed during writing out and reading in
+    hidden_dim = int(hidden_dim)
+    learning_rate = float(learning_rate)
+    num_epochs = int(num_epochs)
+    weight_decay = float(weight_decay)
     dataset = prep_train(dataframe)
     train_features, train_labels, val_features, val_labels = split_datasets(dataset, 0.1)
     train_data, val_data = create_datasets(train_features, train_labels, val_features, val_labels)
     trainloader, valloader = prep_loaders(train_data, 1, val_data, 1)
 
-    model = Binary_Network(input_dim, int(hidden_dim)).to(device)
+    model = Binary_Network(input_dim, hidden_dim).to(device)
     criterion = nn.BCELoss()
     optimiser = optim.Adam(model.parameters(), learning_rate, weight_decay=weight_decay)
     running_loss = run_model(model, trainloader, num_epochs, criterion, optimiser)

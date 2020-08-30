@@ -1,6 +1,5 @@
 # Configuration file for the Binary_Network
 ---
-train_new: True # If True, trains a new neural network and overwrites the current trained_model.pth file
 
 Binary_Network:
   num_epochs: 60 # Number of passes over the training data

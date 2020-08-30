@@ -1,2 +1,3 @@
 from . import *
-__version__ = "1.2.3"
+## Keep version at correct number for PyPI and increment the other when testing on testPyPI
+__version__ = "1.3.0"
