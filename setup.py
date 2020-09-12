@@ -9,7 +9,7 @@ README = (HERE/"README.md").read_text()
 
 setup(
     name="Titanicbc",
-    version="1.1.2",
+    version="1.4.5",
     packages=find_packages(include=['Titanicbc']), #.* and init are interchangable
 
     install_requires=["docutils>=0.3", "torch>=1.5.0", "pandas>=1.0.3", "matplotlib>=3.2.1"],
