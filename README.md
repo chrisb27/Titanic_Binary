@@ -30,15 +30,11 @@ If you wish to predict using the pre-trained network included in the package ins
 
 ___
 
-## User Interface ##
-
-The options for config.yaml are presented below in the following format;
-
-***option number. Key (value options)*** 
+## User Interface
 
 Training neural networks using the Titanicbc package is made easy through the Graphical User Interface. The hyper-parameters that can be customised from the GUI are given below in the following format;
 
-Key (value options or input type) - info
+***Key (value options or input type) - info***
 
 hidden_dim (Integer) - Number of neurons in each of the 3 hidden layers within the network.
 
